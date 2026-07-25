@@ -5,7 +5,7 @@ import os
 import plotly.express as px
 import streamlit as st
 
-from analysis import executive_metrics, run_pipeline, summarize_for_ai
+from analysis import executive_metrics, load_processed, summarize_for_ai
 
 
 st.set_page_config(page_title="TechLogistics DSS", page_icon="📊", layout="wide")
@@ -15,7 +15,7 @@ st.caption("EDA, transformación y visualización de rentabilidad, operación y 
 
 @st.cache_data
 def get_data():
-    return run_pipeline()
+    return load_processed()
 
 
 try:

@@ -8,11 +8,11 @@ Solución del taller de EDA, transformación y visualización. El proyecto convi
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python analysis.py
 streamlit run app.py
-python generate_report.py
 ```
 
-Los CSV se leen desde `data/raw`, ruta incluida en el repositorio para que la aplicación funcione igual localmente y en Streamlit Community Cloud.
+`analysis.py` lee los CSV desde `data/raw` y materializa los artefactos limpios en `data/processed`. `app.py` lee exclusivamente esos artefactos; no limpia ni transforma datos en memoria al iniciar.
 
 ## Streamlit Community Cloud
 
@@ -37,7 +37,6 @@ No se requiere una ruta absoluta ni acceso a archivos fuera del repositorio.
 
 - `analysis.py`: pipeline modular y métricas derivadas.
 - `app.py`: Streamlit con sidebar, tabs, filtros, auditoría, excluidos, descarga e integración Groq.
-- `generate_report.py`: genera `Informe_Hallazgos_TechLogistics.pdf` con cuatro evidencias visuales y plan de acción.
 
 ## Groq
 

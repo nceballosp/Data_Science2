@@ -1,0 +1,2 @@
+SKU_ID,Categoria,Stock_Actual,Costo_Unitario_USD,Punto_Reorden,Lead_Time_Dias,Bodega_Origen,Ultima_Revision
+PROD-1500,Smartphones,,850000.0,196,0.0,ZONA_FRANCA,2025-09-03
