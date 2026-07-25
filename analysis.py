@@ -221,6 +221,7 @@ def executive_metrics(truth: pd.DataFrame) -> dict[str, float]:
 
 def summarize_for_ai(truth: pd.DataFrame) -> dict[str, Any]:
     m = executive_metrics(truth)
+    ticket_rate = truth["Ticket_Soporte"].fillna(0).gt(0.5)
     return {**m, "top_margenes_negativos": truth.groupby("SKU_ID")["Margen_USD"].sum().nsmallest(5).round(2).to_dict(),
             "ciudades_nps": truth.groupby("Ciudad_Destino")["NPS"].mean().round(2).to_dict(),
             "bodegas_tickets": truth.assign(_ticket=ticket_rate).groupby("Bodega_Origen")["_ticket"].mean().mul(100).round(2).to_dict()}

@@ -7,6 +7,7 @@ import plotly.express as px
 import streamlit as st
 
 from analysis import executive_metrics, load_processed, summarize_for_ai
+from transparency import build_transparency
 
 
 st.set_page_config(page_title="TechLogistics DSS", page_icon="📊", layout="wide")
@@ -59,7 +60,19 @@ for col, label, value in zip(cols, ["Ingresos", "Margen", "Margen %", "Ventas fa
                               f"{m['ventas_fantasma']:,}", f"{m['nps_promedio']:.1f}", f"{m['tickets_pct']:.1f}%"]):
     col.metric(label, value)
 
-tab_ops, tab_client, tab_ai = st.tabs(["Operaciones", "Cliente", "Insights de IA"])
+tab_transparency, tab_ops, tab_client, tab_ai = st.tabs(["Transparencia", "Operaciones", "Cliente", "Insights de IA"])
+
+with tab_transparency:
+    st.subheader("Transparencia de transformación")
+    st.caption("Comparativo calculado desde data/raw y data/processed; no se genera audit.json.")
+    transparency = build_transparency()
+    st.dataframe(transparency, use_container_width=True, hide_index=True)
+    chart = transparency.melt(id_vars="Dataset", value_vars=["Health raw (%)", "Health clean (%)"],
+                              var_name="Estado", value_name="Health Score")
+    st.plotly_chart(px.bar(chart, x="Dataset", y="Health Score", color="Estado", barmode="group",
+                           title="Health Score antes y después"), use_container_width=True)
+    st.plotly_chart(px.bar(transparency, x="Dataset", y=["Nulos raw (%)", "Nulos clean (%)"], barmode="group",
+                           title="Nulidad antes y después"), use_container_width=True)
 
 with tab_ops:
     st.subheader("Rentabilidad, demanda y crisis logística")
