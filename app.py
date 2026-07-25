@@ -82,13 +82,36 @@ with tab_ops:
                             title="Evolución mensual de ingresos y margen"), use_container_width=True)
     left, right = st.columns(2)
     sku_margin = filtered.groupby("SKU_ID", as_index=False).agg(Margen_USD=("Margen_USD", "sum"), Ingreso_USD=("Ingreso_USD", "sum"))
+    online_negative = filtered[filtered["Canal_Venta"].eq("Online")].groupby("SKU_ID", as_index=False).agg(
+        Margen_USD=("Margen_USD", "sum"), Ingreso_USD=("Ingreso_USD", "sum"),
+        Unidades=("Cantidad_Vendida", "sum")).query("Margen_USD < 0").sort_values("Margen_USD")
     with left:
-        st.plotly_chart(px.bar(sku_margin.nsmallest(15, "Margen_USD"), x="Margen_USD", y="SKU_ID", orientation="h",
-                               title="15 SKUs con menor margen"), use_container_width=True)
+        st.plotly_chart(px.bar(sku_margin[sku_margin["Margen_USD"] < 0].nsmallest(15, "Margen_USD"),
+                               x="Margen_USD", y="SKU_ID", orientation="h", color="Margen_USD",
+                               color_continuous_scale="Reds", title="Fuga de capital: SKUs con margen negativo"),
+                         use_container_width=True)
     with right:
-        city = filtered.groupby("Ciudad_Destino", as_index=False).agg(Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"))
-        st.plotly_chart(px.scatter(city, x="Tiempo_Entrega", y="NPS", text="Ciudad_Destino", size_max=18,
-                                   title="Entrega vs NPS por ciudad"), use_container_width=True)
+        st.plotly_chart(px.bar(online_negative.head(10), x="Margen_USD", y="SKU_ID", orientation="h",
+                               hover_data=["Ingreso_USD", "Unidades"], color="Margen_USD",
+                               color_continuous_scale="Reds", title="Canal Online: SKU con pérdida"),
+                         use_container_width=True)
+    city = filtered.groupby("Ciudad_Destino", as_index=False).agg(Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"))
+    city_fig = px.scatter(city, x="Tiempo_Entrega", y="NPS", text="Ciudad_Destino", size_max=18,
+                          title="Crisis logística: entrega vs. NPS por ciudad")
+    city_fig.add_hline(y=0, line_dash="dash", line_color="red")
+    st.plotly_chart(city_fig, use_container_width=True)
+    combo = filtered.groupby(["Ciudad_Destino", "Bodega_Origen"], as_index=False).agg(
+        Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"),
+        Ordenes=("Transaccion_ID", "count"))
+    combo["Zona"] = combo["Ciudad_Destino"] + " / " + combo["Bodega_Origen"]
+    st.plotly_chart(px.scatter(combo.sort_values("NPS").head(15), x="Entrega", y="NPS", size="Ordenes",
+                               color="Tickets", hover_name="Zona", color_continuous_scale="Reds",
+                               title="Zonas críticas: ciudad y bodega"), use_container_width=True)
+    ghost = filtered.groupby("Venta_Fantasma", as_index=False).agg(Ingreso=("Ingreso_USD", "sum"),
+                                                                    Ordenes=("Transaccion_ID", "count"))
+    ghost["Tipo"] = ghost["Venta_Fantasma"].map({True: "SKU sin catálogo", False: "SKU catalogado"})
+    st.plotly_chart(px.pie(ghost, names="Tipo", values="Ingreso", hole=0.45,
+                           title="Venta invisible: ingreso con y sin catálogo"), use_container_width=True)
     channel = filtered.groupby("Canal_Venta", as_index=False).agg(Ingresos=("Ingreso_USD", "sum"), Margen=("Margen_USD", "sum"))
     status = filtered.groupby("Estado_Envio", as_index=False).agg(Ventas=("Transaccion_ID", "count"),
                                                                     Entrega=("Tiempo_Entrega_Real", "mean"))
@@ -111,17 +134,24 @@ with tab_client:
     st.subheader("Fidelidad, disponibilidad y soporte")
     category = filtered.groupby("Categoria", as_index=False).agg(Stock=("Stock_Actual", "mean"), NPS=("NPS", "mean"),
                                                                   Tickets=("Ticket_Activo", "mean"), Margen=("Margen_USD", "sum"))
-    st.plotly_chart(px.scatter(category, x="Stock", y="NPS", size="Tickets", color="Categoria", hover_data=["Margen"],
-                               title="Disponibilidad alta vs. sentimiento negativo"), use_container_width=True)
+    category_fig = px.scatter(category, x="Stock", y="NPS", size="Tickets", color="Categoria", hover_data=["Margen"],
+                              title="Diagnóstico de fidelidad: stock alto vs. NPS negativo")
+    category_fig.add_hline(y=0, line_dash="dash", line_color="red")
+    category_fig.add_vline(x=category["Stock"].median(), line_dash="dot", line_color="gray")
+    st.plotly_chart(category_fig, use_container_width=True)
     st.dataframe(category.sort_values("NPS"), use_container_width=True)
     ratings = filtered.groupby("Categoria", as_index=False).agg(Rating_Producto=("Rating_Producto", "mean"),
                                                                   Rating_Logistica=("Rating_Logistica", "mean"))
     st.plotly_chart(px.bar(ratings, x="Categoria", y=["Rating_Producto", "Rating_Logistica"], barmode="group",
                            title="Rating de producto vs. logística por categoría"), use_container_width=True)
     warehouse = filtered.groupby("Bodega_Origen", as_index=False).agg(Stock=("Stock_Actual", "mean"),
-                                                                        NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"))
-    st.plotly_chart(px.scatter(warehouse, x="Stock", y="Tickets", size="Stock", color="NPS",
-                               hover_name="Bodega_Origen", title="Stock, tickets y NPS por bodega"), use_container_width=True)
+                                                                        NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"),
+                                                                        Revision=("Dias_Revision", "mean"))
+    risk_fig = px.scatter(warehouse, x="Revision", y="Tickets", size="Stock", color="NPS",
+                          hover_name="Bodega_Origen", color_continuous_scale="RdYlGn",
+                          title="Riesgo operativo: antigüedad de revisión vs. tickets")
+    risk_fig.update_yaxes(tickformat=".0%")
+    st.plotly_chart(risk_fig, use_container_width=True)
     st.info("La paradoja de stock alto y NPS negativo debe contrastarse con rating de producto, tickets y margen: disponibilidad no equivale a calidad ni a valor percibido.")
 
 with tab_ai:
