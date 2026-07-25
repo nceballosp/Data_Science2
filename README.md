@@ -16,7 +16,7 @@ La fuente de verdad es `data/processed/truth_dataset.csv`. Las ventas con SKU no
 
 ## Aplicacion en la nube
 
-[Abrir TechLogistics DSS en Streamlit Community Cloud](https://TU-USUARIO-techlogistics.streamlit.app) *(reemplazar por la URL definitiva al publicar la app)*.
+[Abrir TechLogistics DSS en Streamlit Community Cloud](https://datascience2-nzhqezmish7w4p4s8qhhlf.streamlit.app)
 
 Configuracion recomendada en Streamlit Community Cloud:
 
