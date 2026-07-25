@@ -9,6 +9,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python analysis.py
+python generate_tex_figures.py
 streamlit run app.py
 ```
 
@@ -37,6 +38,7 @@ No se requiere una ruta absoluta ni acceso a archivos fuera del repositorio.
 
 - `analysis.py`: pipeline modular y métricas derivadas.
 - `app.py`: Streamlit con sidebar, tabs, filtros, auditoría, excluidos, descarga e integración Groq.
+- `generate_tex_figures.py`: genera las mismas visualizaciones analíticas del dashboard para el informe LaTeX.
 - `data/processed/feedback_excluded.csv`: feedback duplicado excluido por `Feedback_ID`.
 
 ## Groq

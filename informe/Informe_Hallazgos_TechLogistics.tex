@@ -7,6 +7,7 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{array}
+\usepackage{graphicx}
 \geometry{margin=2.2cm}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 
@@ -16,6 +17,41 @@
 
 \begin{document}
 \maketitle
+
+\section*{Evidencia visual}
+Las figuras siguientes se generan con las mismas agregaciones y variables que
+las visualizaciones de Streamlit. Cada figura corresponde al punto analítico
+que se desarrolla en las secciones posteriores.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/01_margen_negativo.png}
+\caption{Punto 1: SKUs con mayor margen negativo.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/02_crisis_logistica.png}
+\caption{Punto 2: zonas ciudad--bodega con menor NPS y mayor presión logística.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.65\textwidth]{tex_figures/03_venta_invisible.png}
+\caption{Punto 3: ingreso correspondiente a SKU sin catálogo oficial.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/04_fidelidad.png}
+\caption{Punto 4: stock promedio frente a NPS por categoría.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/05_riesgo_operativo.png}
+\caption{Punto 5: antigüedad de revisión frente a tickets por bodega.}
+\end{figure}
 
 \section*{Resumen ejecutivo}
 El análisis se realizó sobre la fuente de verdad materializada en
@@ -29,7 +65,7 @@ USD 14.203.237,50 (19,05\%). El hallazgo de mayor riesgo financiero es que
 USD 12.976.848,54 corresponden a ventas sin SKU catalogado, equivalentes al
 17,40\% del ingreso total.
 
-\section{1. Fuga de capital y rentabilidad}
+\section{Fuga de capital y rentabilidad}
 Se localizaron 3.206 registros con margen transaccional negativo, cuyo margen
 acumulado es de USD -11.544.543,91. Los SKU con mayor pérdida acumulada son:
 
@@ -59,7 +95,7 @@ volumen es precisamente una señal de que el precio final, el costo unitario o
 el costo de envío están mal configurados. La prioridad es congelar promociones
 de estos SKU en Online y revisar precio mínimo, descuentos y costo logístico.
 
-\section{2. Crisis logística y cuellos de botella}
+\section{Crisis logística y cuellos de botella}
 La correlación global dentro de cada ciudad entre tiempo de entrega y NPS es
 débile: el valor absoluto máximo observado es aproximadamente 0,05 en
 Barranquilla. Por ello, el dataset no permite afirmar una relación lineal fuerte;
@@ -90,7 +126,7 @@ segundo frente de intervención. La recomendación debe validarse con SLA,
 transportista y tamaño de muestra antes de terminar el contrato, porque la
 correlación simple por ciudad es débil.
 
-\section{3. Análisis de la venta invisible}
+\section{Análisis de la venta invisible}
 El left join identificó 1.728 transacciones cuyo SKU no aparece en el inventario
 oficial. Estas ventas generaron USD 12.976.848,54, que representan:
 
@@ -107,7 +143,7 @@ inventario y de reconocimiento de rentabilidad, no una simple anomalía técnica
 Debe cerrarse la brecha entre catálogo, ERP y canales de venta antes de escalar
 la operación.
 
-\section{4. Diagnóstico de fidelidad}
+\section{Diagnóstico de fidelidad}
 Sí existe una categoría con alta disponibilidad y sentimiento negativo:
 Smartphones tiene stock promedio de 1.017,14 unidades y NPS promedio de -4,82.
 También ``Sin categoría'' presenta NPS negativo (-3,13), aunque su problema
@@ -134,7 +170,7 @@ es cercano a 3/5, el rating logístico también ronda 3/5 y existe una tasa de
 tickets de 15,41\%. La disponibilidad alta no está convirtiéndose en satisfacción;
 se debe revisar precio percibido, calidad del producto y promesa de entrega.
 
-\section{5. Riesgo operativo y bodegas a ciegas}
+\section{Riesgo operativo y bodegas a ciegas}
 La antigüedad promedio de la última revisión supera 500 días en todas las
 bodegas. Las mayores antigüedades son BOD-EXT-99 (530,57 días), OCCIDENTE
 (530,37 días) y ZONA\_FRANCA (522,31 días).
