@@ -34,6 +34,11 @@ with st.sidebar:
     if st.button("Refrescar análisis"):
         st.cache_data.clear()
         st.rerun()
+    modelo_groq = st.selectbox(
+    "Modelo",
+    ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it"],
+    index=0,
+    )
 
 filtered = truth.copy()
 if isinstance(dates, tuple) and len(dates) == 2:
@@ -115,7 +120,7 @@ with tab_ai:
                           "tres párrafos de recomendaciones accionables, priorizadas y dirigidas a la junta. "
                           "No inventes datos:\n" + json.dumps(summary, ensure_ascii=False))
                 response = Groq(api_key=key).chat.completions.create(
-                    model="llama3-8b-8192", messages=[{"role": "user", "content": prompt}], temperature=0.2)
+                    model=modelo_groq, messages=[{"role": "user", "content": prompt}], temperature=0.2)
                 st.write(response.choices[0].message.content)
             except Exception as exc:
                 st.error(f"Error en la integración Groq: {exc}")
