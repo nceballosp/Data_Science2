@@ -8,6 +8,7 @@
 \usepackage{hyperref}
 \usepackage{array}
 \usepackage{graphicx}
+\usepackage{float}
 \geometry{margin=2.2cm}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 
@@ -17,41 +18,6 @@
 
 \begin{document}
 \maketitle
-
-\section*{Evidencia visual}
-Las figuras siguientes se generan con las mismas agregaciones y variables que
-las visualizaciones de Streamlit. Cada figura corresponde al punto analítico
-que se desarrolla en las secciones posteriores.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/01_margen_negativo.png}
-\caption{Punto 1: SKUs con mayor margen negativo.}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/02_crisis_logistica.png}
-\caption{Punto 2: zonas ciudad--bodega con menor NPS y mayor presión logística.}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.65\textwidth]{tex_figures/03_venta_invisible.png}
-\caption{Punto 3: ingreso correspondiente a SKU sin catálogo oficial.}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/04_fidelidad.png}
-\caption{Punto 4: stock promedio frente a NPS por categoría.}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/05_riesgo_operativo.png}
-\caption{Punto 5: antigüedad de revisión frente a tickets por bodega.}
-\end{figure}
 
 \section*{Resumen ejecutivo}
 El análisis se realizó sobre la fuente de verdad materializada en
@@ -95,6 +61,12 @@ volumen es precisamente una señal de que el precio final, el costo unitario o
 el costo de envío están mal configurados. La prioridad es congelar promociones
 de estos SKU en Online y revisar precio mínimo, descuentos y costo logístico.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/01_margen_negativo.png}
+\caption{Punto 1: SKUs con mayor margen negativo.}
+\end{figure}
+
 \section{Crisis logística y cuellos de botella}
 La correlación global dentro de cada ciudad entre tiempo de entrega y NPS es
 débile: el valor absoluto máximo observado es aproximadamente 0,05 en
@@ -126,6 +98,12 @@ segundo frente de intervención. La recomendación debe validarse con SLA,
 transportista y tamaño de muestra antes de terminar el contrato, porque la
 correlación simple por ciudad es débil.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/02_crisis_logistica.png}
+\caption{Punto 2: zonas ciudad--bodega con menor NPS y mayor presión logística.}
+\end{figure}
+
 \section{Análisis de la venta invisible}
 El left join identificó 1.728 transacciones cuyo SKU no aparece en el inventario
 oficial. Estas ventas generaron USD 12.976.848,54, que representan:
@@ -143,11 +121,23 @@ inventario y de reconocimiento de rentabilidad, no una simple anomalía técnica
 Debe cerrarse la brecha entre catálogo, ERP y canales de venta antes de escalar
 la operación.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.35\textwidth]{tex_figures/03_venta_invisible.png}
+\caption{Punto 3: ingreso correspondiente a SKU sin catálogo oficial.}
+\end{figure}
+
 \section{Diagnóstico de fidelidad}
 Sí existe una categoría con alta disponibilidad y sentimiento negativo:
 Smartphones tiene stock promedio de 1.017,14 unidades y NPS promedio de -4,82.
 También ``Sin categoría'' presenta NPS negativo (-3,13), aunque su problema
 principal es de calidad de catálogo.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/04_fidelidad.png}
+\caption{Punto 4: stock promedio frente a NPS por categoría.}
+\end{figure}
 
 \begin{table}[h]
 \centering
@@ -197,6 +187,12 @@ NORTE combina inventario muy antiguo con el peor NPS y ZONA\_FRANCA combina
 antigüedad alta con NPS negativo. Estas bodegas operan ``a ciegas'' en términos
 de actualización del stock, y la consecuencia observable es menor satisfacción,
 especialmente en las rutas críticas identificadas.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/05_riesgo_operativo.png}
+\caption{Punto 5: antigüedad de revisión frente a tickets por bodega.}
+\end{figure}
 
 \section*{Plan de acción priorizado}
 \begin{enumerate}
