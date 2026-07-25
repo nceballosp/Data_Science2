@@ -157,14 +157,9 @@ def build_truth(data: dict[str, pd.DataFrame]) -> pd.DataFrame:
     truth = truth.merge(fb, on="Transaccion_ID", how="left")
     truth["Venta_Fantasma"] = truth["_catalog_match"].eq("left_only")
     truth["Ingreso_USD"] = truth["Cantidad_Vendida"] * truth["Precio_Venta_Final"]
-    truth["Costo_Producto_USD"] = truth["Cantidad_Vendida"] * truth["Costo_Unitario_USD"]
-    truth["Margen_USD"] = truth["Ingreso_USD"] - truth["Costo_Producto_USD"] - truth["Costo_Envio"]
+    truth["Margen_USD"] = truth["Ingreso_USD"] - (truth["Cantidad_Vendida"] * truth["Costo_Unitario_USD"]) - truth["Costo_Envio"]
     truth["Margen_Pct"] = np.where(truth["Ingreso_USD"].ne(0), truth["Margen_USD"] / truth["Ingreso_USD"] * 100, np.nan)
     truth["Brecha_Entrega_Dias"] = truth["Tiempo_Entrega_Real"] - truth["Lead_Time_Dias"]
-    truth["Dias_Desde_Revision"] = (TODAY - truth["Ultima_Revision"]).dt.days
-    truth["Stock_Alto"] = truth["Stock_Actual"] > truth["Stock_Actual"].median()
-    truth["NPS_Bajo"] = truth["NPS"] < 0
-    truth["Ticket"] = truth["Ticket_Soporte"].fillna(0).gt(0.5)
     return truth
 
 
@@ -177,19 +172,20 @@ def save_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
     """Ejecuta la limpieza y materializa los datasets para consumo de la app."""
     data, audit, truth = run_pipeline()
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    data["inventory"].to_csv(PROCESSED_DIR / "inventory_clean.csv", index=False)
+    data["transactions"].to_csv(PROCESSED_DIR / "transactions_clean.csv", index=False)
+    data["feedback"].to_csv(PROCESSED_DIR / "feedback_clean.csv", index=False)
     data["excluded_transactions"].to_csv(PROCESSED_DIR / "transactions_excluded.csv", index=False)
     data["excluded_inventory"].to_csv(PROCESSED_DIR / "inventory_excluded.csv", index=False)
     truth.to_csv(PROCESSED_DIR / "truth_dataset.csv", index=False)
-    (PROCESSED_DIR / "audit.json").write_text(
-        json.dumps(audit, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
-    )
     return data, audit, truth
 
 
 def load_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFrame]:
     """Lee exclusivamente los artefactos materializados en data/processed."""
     required = [
-        "transactions_excluded.csv", "inventory_excluded.csv", "truth_dataset.csv", "audit.json",
+        "inventory_clean.csv", "transactions_clean.csv", "feedback_clean.csv",
+        "transactions_excluded.csv", "inventory_excluded.csv", "truth_dataset.csv",
     ]
     missing = [name for name in required if not (PROCESSED_DIR / name).exists()]
     if missing:
@@ -197,6 +193,9 @@ def load_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
             "Faltan artefactos procesados: " + ", ".join(missing) + ". Ejecuta `python analysis.py`."
         )
     data = {
+        "inventory": pd.read_csv(PROCESSED_DIR / "inventory_clean.csv", parse_dates=["Ultima_Revision"]),
+        "transactions": pd.read_csv(PROCESSED_DIR / "transactions_clean.csv", parse_dates=["Fecha_Venta"]),
+        "feedback": pd.read_csv(PROCESSED_DIR / "feedback_clean.csv"),
         "excluded_transactions": pd.read_csv(PROCESSED_DIR / "transactions_excluded.csv"),
         "excluded_inventory": pd.read_csv(PROCESSED_DIR / "inventory_excluded.csv"),
     }
@@ -204,11 +203,11 @@ def load_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
     for column in ["Venta_Fantasma", "Stock_Alto", "NPS_Bajo", "Ticket"]:
         if column in truth:
             truth[column] = truth[column].astype(str).str.lower().eq("true")
-    audit = json.loads((PROCESSED_DIR / "audit.json").read_text(encoding="utf-8"))
-    return data, audit, truth
+    return data, {}, truth
 
 
 def executive_metrics(truth: pd.DataFrame) -> dict[str, float]:
+    ticket_rate = truth["Ticket_Soporte"].fillna(0).gt(0.5)
     return {
         "ingreso_total": float(truth["Ingreso_USD"].sum()),
         "margen_total": float(truth["Margen_USD"].sum()),
@@ -216,7 +215,7 @@ def executive_metrics(truth: pd.DataFrame) -> dict[str, float]:
         "ventas_fantasma": int(truth["Venta_Fantasma"].sum()),
         "ingreso_fantasma": float(truth.loc[truth["Venta_Fantasma"], "Ingreso_USD"].sum()),
         "nps_promedio": float(truth["NPS"].mean()),
-        "tickets_pct": float(truth["Ticket"].mean() * 100),
+        "tickets_pct": float(ticket_rate.mean() * 100),
     }
 
 
@@ -224,7 +223,7 @@ def summarize_for_ai(truth: pd.DataFrame) -> dict[str, Any]:
     m = executive_metrics(truth)
     return {**m, "top_margenes_negativos": truth.groupby("SKU_ID")["Margen_USD"].sum().nsmallest(5).round(2).to_dict(),
             "ciudades_nps": truth.groupby("Ciudad_Destino")["NPS"].mean().round(2).to_dict(),
-            "bodegas_tickets": truth.groupby("Bodega_Origen")["Ticket"].mean().mul(100).round(2).to_dict()}
+            "bodegas_tickets": truth.assign(_ticket=ticket_rate).groupby("Bodega_Origen")["_ticket"].mean().mul(100).round(2).to_dict()}
 
 
 if __name__ == "__main__":

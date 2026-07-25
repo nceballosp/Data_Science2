@@ -2,6 +2,7 @@
 import json
 import os
 
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
@@ -47,6 +48,9 @@ if categories:
     filtered = filtered[filtered["Categoria"].isin(categories)]
 if warehouses:
     filtered = filtered[filtered["Bodega_Origen"].isin(warehouses)]
+filtered = filtered.copy()
+filtered["Ticket_Activo"] = filtered["Ticket_Soporte"].fillna(0).gt(0.5)
+filtered["Dias_Revision"] = (pd.Timestamp.now().normalize() - filtered["Ultima_Revision"]).dt.days
 
 m = executive_metrics(filtered)
 cols = st.columns(6)
@@ -55,30 +59,14 @@ for col, label, value in zip(cols, ["Ingresos", "Margen", "Margen %", "Ventas fa
                               f"{m['ventas_fantasma']:,}", f"{m['nps_promedio']:.1f}", f"{m['tickets_pct']:.1f}%"]):
     col.metric(label, value)
 
-tab_audit, tab_ops, tab_client, tab_ai = st.tabs(["Auditoría", "Operaciones", "Cliente", "Insights de IA"])
-
-with tab_audit:
-    st.subheader("Transparencia: antes vs. después")
-    rows = []
-    for name in audit["before"]:
-        before, after = audit["before"][name], audit["after"][name]
-        rows.append({"Dataset": name, "Filas antes": before["rows"], "Filas después": after["rows"],
-                     "Nulos antes %": before["null_pct"], "Nulos después %": after["null_pct"],
-                     "Duplicados eliminados": audit["excluded"][name].get("duplicates_removed", 0)})
-    st.dataframe(rows, use_container_width=True, hide_index=True)
-    st.metric("Health Score antes", f"{audit['before_health']:.1f}%")
-    st.metric("Health Score después", f"{audit['after_health']:.1f}%")
-    st.write("**Decisiones documentadas**")
-    for key, reason in audit["reasons"].items():
-        st.write(f"- **{key}:** {reason}")
-    st.download_button("Descargar auditoría JSON", json.dumps(audit, ensure_ascii=False, indent=2),
-                       "auditoria_limpieza.json", "application/json")
-    with st.expander("Ver registros excluidos"):
-        st.dataframe(data["excluded_transactions"], use_container_width=True)
-        st.dataframe(data["excluded_inventory"], use_container_width=True)
+tab_ops, tab_client, tab_ai = st.tabs(["Operaciones", "Cliente", "Insights de IA"])
 
 with tab_ops:
-    st.subheader("Rentabilidad y crisis logística")
+    st.subheader("Rentabilidad, demanda y crisis logística")
+    timeline = filtered.groupby(filtered["Fecha_Venta"].dt.to_period("M").astype(str), as_index=False).agg(
+        Ingresos=("Ingreso_USD", "sum"), Margen=("Margen_USD", "sum"))
+    st.plotly_chart(px.line(timeline, x="Fecha_Venta", y=["Ingresos", "Margen"], markers=True,
+                            title="Evolución mensual de ingresos y margen"), use_container_width=True)
     left, right = st.columns(2)
     sku_margin = filtered.groupby("SKU_ID", as_index=False).agg(Margen_USD=("Margen_USD", "sum"), Ingreso_USD=("Ingreso_USD", "sum"))
     with left:
@@ -88,17 +76,38 @@ with tab_ops:
         city = filtered.groupby("Ciudad_Destino", as_index=False).agg(Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"))
         st.plotly_chart(px.scatter(city, x="Tiempo_Entrega", y="NPS", text="Ciudad_Destino", size_max=18,
                                    title="Entrega vs NPS por ciudad"), use_container_width=True)
+    channel = filtered.groupby("Canal_Venta", as_index=False).agg(Ingresos=("Ingreso_USD", "sum"), Margen=("Margen_USD", "sum"))
+    status = filtered.groupby("Estado_Envio", as_index=False).agg(Ventas=("Transaccion_ID", "count"),
+                                                                    Entrega=("Tiempo_Entrega_Real", "mean"))
+    left, right = st.columns(2)
+    with left:
+        st.plotly_chart(px.bar(channel, x="Canal_Venta", y=["Ingresos", "Margen"], barmode="group",
+                               title="Ingresos y margen por canal"), use_container_width=True)
+    with right:
+        st.plotly_chart(px.bar(status, x="Estado_Envio", y="Ventas", color="Entrega",
+                               title="Volumen por estado de envío"), use_container_width=True)
     st.dataframe(filtered.groupby("Bodega_Origen", as_index=False).agg(
-        Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"), Tickets=("Ticket", "mean"),
-        Dias_Revision=("Dias_Desde_Revision", "mean")).sort_values("NPS"), use_container_width=True)
+        Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"),
+        Dias_Revision=("Dias_Revision", "mean")).sort_values("NPS"), use_container_width=True)
+    with st.expander("Ver registros excluidos"):
+        st.dataframe(data["excluded_transactions"], use_container_width=True)
+        st.dataframe(data["excluded_inventory"], use_container_width=True)
 
 with tab_client:
     st.subheader("Fidelidad, disponibilidad y soporte")
     category = filtered.groupby("Categoria", as_index=False).agg(Stock=("Stock_Actual", "mean"), NPS=("NPS", "mean"),
-                                                                  Tickets=("Ticket", "mean"), Margen=("Margen_USD", "sum"))
+                                                                  Tickets=("Ticket_Activo", "mean"), Margen=("Margen_USD", "sum"))
     st.plotly_chart(px.scatter(category, x="Stock", y="NPS", size="Tickets", color="Categoria", hover_data=["Margen"],
                                title="Disponibilidad alta vs. sentimiento negativo"), use_container_width=True)
     st.dataframe(category.sort_values("NPS"), use_container_width=True)
+    ratings = filtered.groupby("Categoria", as_index=False).agg(Rating_Producto=("Rating_Producto", "mean"),
+                                                                  Rating_Logistica=("Rating_Logistica", "mean"))
+    st.plotly_chart(px.bar(ratings, x="Categoria", y=["Rating_Producto", "Rating_Logistica"], barmode="group",
+                           title="Rating de producto vs. logística por categoría"), use_container_width=True)
+    warehouse = filtered.groupby("Bodega_Origen", as_index=False).agg(Stock=("Stock_Actual", "mean"),
+                                                                        NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"))
+    st.plotly_chart(px.scatter(warehouse, x="Stock", y="Tickets", size="Stock", color="NPS",
+                               hover_name="Bodega_Origen", title="Stock, tickets y NPS por bodega"), use_container_width=True)
     st.info("La paradoja de stock alto y NPS negativo debe contrastarse con rating de producto, tickets y margen: disponibilidad no equivale a calidad ni a valor percibido.")
 
 with tab_ai:

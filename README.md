@@ -12,7 +12,7 @@ python analysis.py
 streamlit run app.py
 ```
 
-`analysis.py` lee los CSV desde `data/raw` y materializa los artefactos limpios en `data/processed`. `app.py` lee exclusivamente esos artefactos; no limpia ni transforma datos en memoria al iniciar.
+`analysis.py` lee los CSV desde `data/raw` y materializa los clean de cada dataset, la fuente de verdad y los archivos de excluidos en `data/processed`. `app.py` lee exclusivamente esos artefactos; no limpia ni transforma datos en memoria al iniciar.
 
 ## Streamlit Community Cloud
 
