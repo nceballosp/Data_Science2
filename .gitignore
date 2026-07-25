@@ -3,4 +3,5 @@ __pycache__/
 .venv/
 .streamlit/secrets.toml
 venv/
+.miktex/
 .env
