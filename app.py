@@ -105,6 +105,7 @@ with tab_ops:
     with st.expander("Ver registros excluidos"):
         st.dataframe(data["excluded_transactions"], use_container_width=True)
         st.dataframe(data["excluded_inventory"], use_container_width=True)
+        st.dataframe(data["excluded_feedback"], use_container_width=True)
 
 with tab_client:
     st.subheader("Fidelidad, disponibilidad y soporte")

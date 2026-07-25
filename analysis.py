@@ -116,6 +116,7 @@ def load_and_clean() -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
     fb = raw_fb.copy()
     audit["before"]["Feedback"] = _quality(fb, "Feedback")
     fb_dups = fb.duplicated(subset=["Feedback_ID"], keep="first")
+    fb_excluded = fb.loc[fb_dups].copy()
     fb = fb.loc[~fb_dups].copy()
     fb["Rating_Producto"] = pd.to_numeric(fb["Rating_Producto"], errors="coerce").where(lambda x: x.between(1, 5))
     fb["Rating_Producto"] = fb["Rating_Producto"].fillna(fb["Rating_Producto"].median())
@@ -135,7 +136,8 @@ def load_and_clean() -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
         "Transacciones": "Se excluyeron cantidades no positivas y fechas futuras; costos de envío faltantes se imputaron con mediana.",
         "Feedback": "Se conservaron ratings válidos, se imputaron ratings/edades inválidos con mediana y se deduplicó por Feedback_ID.",
     }
-    return {"inventory": inv, "transactions": tx, "feedback": fb, "excluded_transactions": tx_excluded, "excluded_inventory": inv_excluded}, audit
+    return {"inventory": inv, "transactions": tx, "feedback": fb, "excluded_transactions": tx_excluded,
+            "excluded_inventory": inv_excluded, "excluded_feedback": fb_excluded}, audit
 
 
 def health_score(audit_section: dict[str, dict[str, Any]]) -> float:
@@ -177,6 +179,7 @@ def save_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
     data["feedback"].to_csv(PROCESSED_DIR / "feedback_clean.csv", index=False)
     data["excluded_transactions"].to_csv(PROCESSED_DIR / "transactions_excluded.csv", index=False)
     data["excluded_inventory"].to_csv(PROCESSED_DIR / "inventory_excluded.csv", index=False)
+    data["excluded_feedback"].to_csv(PROCESSED_DIR / "feedback_excluded.csv", index=False)
     truth.to_csv(PROCESSED_DIR / "truth_dataset.csv", index=False)
     return data, audit, truth
 
@@ -186,6 +189,7 @@ def load_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
     required = [
         "inventory_clean.csv", "transactions_clean.csv", "feedback_clean.csv",
         "transactions_excluded.csv", "inventory_excluded.csv", "truth_dataset.csv",
+        "feedback_excluded.csv",
     ]
     missing = [name for name in required if not (PROCESSED_DIR / name).exists()]
     if missing:
@@ -198,6 +202,7 @@ def load_processed() -> tuple[dict[str, pd.DataFrame], dict[str, Any], pd.DataFr
         "feedback": pd.read_csv(PROCESSED_DIR / "feedback_clean.csv"),
         "excluded_transactions": pd.read_csv(PROCESSED_DIR / "transactions_excluded.csv"),
         "excluded_inventory": pd.read_csv(PROCESSED_DIR / "inventory_excluded.csv"),
+        "excluded_feedback": pd.read_csv(PROCESSED_DIR / "feedback_excluded.csv"),
     }
     truth = pd.read_csv(PROCESSED_DIR / "truth_dataset.csv", parse_dates=["Fecha_Venta", "Ultima_Revision"])
     for column in ["Venta_Fantasma", "Stock_Alto", "NPS_Bajo", "Ticket"]:

@@ -20,7 +20,7 @@ def build_transparency() -> pd.DataFrame:
     sources = [
         ("Inventario", "inventario_central_v2.csv", "inventory_clean.csv", "inventory_excluded.csv"),
         ("Transacciones", "transacciones_logistica_v2.csv", "transactions_clean.csv", "transactions_excluded.csv"),
-        ("Feedback", "feedback_clientes_v2.csv", "feedback_clean.csv", None),
+        ("Feedback", "feedback_clientes_v2.csv", "feedback_clean.csv", "feedback_excluded.csv"),
     ]
     rows = []
     for name, raw_name, clean_name, excluded_name in sources:

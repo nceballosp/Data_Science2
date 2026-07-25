@@ -37,6 +37,7 @@ No se requiere una ruta absoluta ni acceso a archivos fuera del repositorio.
 
 - `analysis.py`: pipeline modular y métricas derivadas.
 - `app.py`: Streamlit con sidebar, tabs, filtros, auditoría, excluidos, descarga e integración Groq.
+- `data/processed/feedback_excluded.csv`: feedback duplicado excluido por `Feedback_ID`.
 
 ## Groq
 
