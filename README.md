@@ -2,7 +2,21 @@
 
 Solucion del taller de EDA, transformacion y visualizacion para TechLogistics. El proyecto integra tres fuentes con problemas de calidad: inventario, transacciones logisticas y feedback de clientes. El resultado es un pipeline reproducible, una fuente de verdad procesada, un dashboard interactivo en Streamlit y un informe ejecutivo en LaTeX.
 
-## Problema de negocio
+**Curso:** Fundamentos en Ciencia de Datos — Maestría en Ciencia de Datos y Analítica, EAFIT 
+**Fecha límite de entrega:** sábado 01 de agosto de 2026
+**Fecha de entrega real:** [26/07/2026]
+
+**Integrantes del equipo:**
+
+| Nombre Completo                  | Cédula         |
+| -------------------------------- | -------------- |
+| Eduardo Andres Piñeros Manjarres | 1067841294     |
+| Juan Jose Vasquez Gomez          | 1017924089     |
+| Natalia Ceballos Posada          | 1034987681     |
+
+---
+
+## 1. Problema de negocio
 
 El analisis busca identificar riesgos que afectan rentabilidad, servicio y fidelizacion:
 
@@ -14,7 +28,7 @@ El analisis busca identificar riesgos que afectan rentabilidad, servicio y fidel
 
 La fuente de verdad es `data/processed/truth_dataset.csv`. Las ventas con SKU no encontrado no se eliminan: se conservan y se marcan como `Venta_Fantasma` para medir el ingreso expuesto.
 
-## Aplicacion en la nube
+## 2. Aplicacion en la nube
 
 [Abrir TechLogistics DSS en Streamlit Community Cloud](https://datascience2-aw35j6n2pppnemtlcs5e9y.streamlit.app)
 
@@ -27,7 +41,7 @@ Configuracion recomendada en Streamlit Community Cloud:
 
 La aplicacion no depende de rutas absolutas ni de archivos fuera del repositorio. Al desplegar, los archivos de `data/processed` deben estar versionados o debe ejecutarse `python src/analysis.py` antes de iniciar Streamlit.
 
-## Instalacion local
+## 3. Instalacion local
 
 Desde la carpeta `Data_Science2`:
 
@@ -45,7 +59,7 @@ source venv/bin/activate
 pip install -r src/requirements.txt
 ```
 
-## Ejecucion
+## 4. Ejecucion
 
 Primero regenere los artefactos procesados desde los datos crudos:
 
@@ -69,7 +83,7 @@ pdflatex Informe_Hallazgos_TechLogistics.tex
 
 La compilacion requiere una distribucion LaTeX con `pdflatex`, por ejemplo MiKTeX o TeX Live.
 
-## Flujo de datos
+## 5. Flujo de datos
 
 ```text
 data/raw/*.csv
@@ -99,7 +113,7 @@ Archivos generados en `data/processed`:
 - `inventory_excluded.csv`, `transactions_excluded.csv` y `feedback_excluded.csv`.
 - `truth_dataset.csv`.
 
-## Calidad y transformacion
+## 6. Calidad y transformacion
 
 - Se normalizan categorias, ciudades, bodegas, fechas, estados, canales y tiempos de entrega.
 - Se excluyen cantidades no positivas y ventas con fecha futura del analisis operativo.
@@ -109,7 +123,7 @@ Archivos generados en `data/processed`:
 - Se usa `left join` entre transacciones e inventario para no perder ventas sin SKU maestro.
 - No se genera ni se requiere `audit.json`. La pestaña Transparencia compara directamente los datos crudos, limpios y excluidos.
 
-## Metricas derivadas
+## 7. Metricas derivadas
 
 El dataset de verdad agrega cinco metricas de negocio:
 
@@ -130,7 +144,7 @@ La app incluye filtros por periodo, categoria y bodega, y cuatro modulos:
 - **Cliente:** stock versus NPS por categoria, ratings de producto y logistica, y antiguedad de revision versus tickets por bodega.
 - **Insights de IA:** resumen estadistico y recomendaciones con Groq cuando se configura `GROQ_API_KEY`. No se envian registros completos al modelo.
 
-## Informe ejecutivo
+## 8. Informe ejecutivo
 
 El informe [Informe_Hallazgos_TechLogistics.tex](informe/Informe_Hallazgos_TechLogistics.tex) responde los cinco puntos del reto con tablas, conclusiones y visualizaciones alineadas con el dashboard. El PDF compilado se encuentra en [informe/Informe_Hallazgos_TechLogistics.pdf](informe/Informe_Hallazgos_TechLogistics.pdf).
 
@@ -143,7 +157,7 @@ Las seis imagenes utilizadas por el informe se exportan desde las visualizacione
 5. Riesgo operativo por antiguedad de revision y tickets.
 6. Matriz de correlacion logistica y de satisfaccion.
 
-## Estructura principal
+## 9. Estructura principal
 
 ```text
 Data_Science2/
@@ -165,7 +179,7 @@ Data_Science2/
 
 La carpeta `venv/` es local y `.miktex/` esta excluida por `.gitignore`; ninguna de las dos debe versionarse.
 
-## Configuracion de IA
+## 10. Configuracion de IA
 
 Groq es opcional. Para habilitar el modulo de recomendaciones, configure la llave como variable de entorno:
 
