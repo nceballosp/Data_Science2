@@ -9,7 +9,7 @@ import pandas as pd
 from analysis import load_processed
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "informe" / "tex_figures"
 
 
