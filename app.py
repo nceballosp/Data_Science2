@@ -5,6 +5,8 @@ import os
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from analysis import executive_metrics, load_processed, summarize_for_ai
 from transparency import build_transparency
@@ -95,11 +97,31 @@ with tab_ops:
                                hover_data=["Ingreso_USD", "Unidades"], color="Margen_USD",
                                color_continuous_scale="Reds", title="Canal Online: SKU con pérdida"),
                          use_container_width=True)
-    city = filtered.groupby("Ciudad_Destino", as_index=False).agg(Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"))
-    city_fig = px.scatter(city, x="Tiempo_Entrega", y="NPS", text="Ciudad_Destino", size_max=18,
-                          title="Crisis logística: entrega vs. NPS por ciudad")
-    city_fig.add_hline(y=0, line_dash="dash", line_color="red")
-    st.plotly_chart(city_fig, use_container_width=True)
+    left, right = st.columns(2)
+    with left:
+        city = filtered.groupby("Ciudad_Destino", as_index=False).agg(Tiempo_Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"))
+        city_fig = px.scatter(city, x="Tiempo_Entrega", y="NPS", text="Ciudad_Destino", size_max=18,
+                            title="Crisis logística: entrega vs. NPS por ciudad")
+        city_fig.add_hline(y=0, line_dash="dash", line_color="red")
+        st.plotly_chart(city_fig, use_container_width=True)
+    with right:
+        corr_matrix = truth.select_dtypes(include=["number"]).corr(method='pearson')
+        plt.figure(figsize=(3, 2))
+        fig = px.imshow(
+        corr_matrix,
+        text_auto=".2f",
+        color_continuous_scale="RdBu_r",
+        zmin=-1, zmax=1,
+        aspect="auto",
+        title=f"Correlación (Pearson)"
+        )
+        fig.update_layout(
+            width=100,
+            height=500,
+            margin=dict(l=40, r=40, t=60, b=40)
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
     combo = filtered.groupby(["Ciudad_Destino", "Bodega_Origen"], as_index=False).agg(
         Entrega=("Tiempo_Entrega_Real", "mean"), NPS=("NPS", "mean"), Tickets=("Ticket_Activo", "mean"),
         Ordenes=("Transaccion_ID", "count"))
