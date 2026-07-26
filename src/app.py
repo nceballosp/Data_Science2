@@ -6,8 +6,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from analysis import executive_metrics, load_processed, summarize_for_ai
-from transparency import build_transparency
+from Data_Science2.src.analysis import executive_metrics, load_processed, summarize_for_ai
+from Data_Science2.src.transparency import build_transparency
 
 
 st.set_page_config(page_title="TechLogistics DSS", page_icon="📊", layout="wide")

@@ -21,11 +21,11 @@ La fuente de verdad es `data/processed/truth_dataset.csv`. Las ventas con SKU no
 Configuracion recomendada en Streamlit Community Cloud:
 
 - **Repository:** repositorio que contiene la carpeta `Data_Science2`.
-- **Main file path:** `Data_Science2/app.py` si se publica desde la raiz del repositorio, o `app.py` si `Data_Science2` es la raiz configurada.
+- **Main file path:** `Data_Science2/src/app.py` si se publica desde la raiz del repositorio, o `src/app.py` si `Data_Science2` es la raiz configurada.
 - **Python:** 3.11 o superior.
 - **Secrets opcional:** `GROQ_API_KEY = "su_llave"`.
 
-La aplicacion no depende de rutas absolutas ni de archivos fuera del repositorio. Al desplegar, los archivos de `data/processed` deben estar versionados o debe ejecutarse `python analysis.py` antes de iniciar Streamlit.
+La aplicacion no depende de rutas absolutas ni de archivos fuera del repositorio. Al desplegar, los archivos de `data/processed` deben estar versionados o debe ejecutarse `python src/analysis.py` antes de iniciar Streamlit.
 
 ## Instalacion local
 
@@ -34,7 +34,7 @@ Desde la carpeta `Data_Science2`:
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
 En Linux o macOS:
@@ -42,7 +42,7 @@ En Linux o macOS:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
 ## Ejecucion
@@ -50,19 +50,19 @@ pip install -r requirements.txt
 Primero regenere los artefactos procesados desde los datos crudos:
 
 ```bash
-python analysis.py
+python src/analysis.py
 ```
 
 Despues inicie el dashboard:
 
 ```bash
-streamlit run app.py
+streamlit run src/app.py
 ```
 
 Para regenerar las figuras utilizadas por el informe y compilarlo localmente:
 
 ```bash
-python generate_tex_figures.py
+python src/generate_tex_figures.py
 cd informe
 pdflatex Informe_Hallazgos_TechLogistics.tex
 pdflatex Informe_Hallazgos_TechLogistics.tex
@@ -76,17 +76,17 @@ La compilacion requiere una distribucion LaTeX con `pdflatex`, por ejemplo MiKTe
 data/raw/*.csv
         |
         v
-analysis.py
+src/analysis.py
         |
         +--> data/processed/*_clean.csv
         +--> data/processed/*_excluded.csv
         +--> data/processed/truth_dataset.csv
                          |
-                         +--> app.py
-                         +--> generate_tex_figures.py --> informe/tex_figures/*.png
+                         +--> src/app.py
+                         +--> src/generate_tex_figures.py --> informe/tex_figures/*.png
 ```
 
-`analysis.py` es el unico modulo que limpia y transforma los datos. `app.py` carga exclusivamente los archivos materializados en `data/processed`; no realiza limpieza ni mantiene una fuente de verdad temporal en memoria.
+`src/analysis.py` es el unico modulo que limpia y transforma los datos. `src/app.py` carga exclusivamente los archivos materializados en `data/processed`; no realiza limpieza ni mantiene una fuente de verdad temporal en memoria.
 
 Archivos de entrada esperados en `data/raw`:
 

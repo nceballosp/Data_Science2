@@ -6,7 +6,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from analysis import load_processed
+from Data_Science2.src.analysis import load_processed
 
 
 ROOT = Path(__file__).resolve().parent
