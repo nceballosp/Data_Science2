@@ -59,10 +59,9 @@ Despues inicie el dashboard:
 streamlit run src/app.py
 ```
 
-Para regenerar las figuras utilizadas por el informe y compilarlo localmente:
+Para compilar el informe localmente usando las imagenes exportadas desde la app:
 
 ```bash
-python src/generate_tex_figures.py
 cd informe
 pdflatex Informe_Hallazgos_TechLogistics.tex
 pdflatex Informe_Hallazgos_TechLogistics.tex
@@ -83,7 +82,7 @@ src/analysis.py
         +--> data/processed/truth_dataset.csv
                          |
                          +--> src/app.py
-                         +--> src/generate_tex_figures.py --> informe/tex_figures/*.png
+                         +--> informe/tex_figures/*.png --> informe/Informe_Hallazgos_TechLogistics.tex
 ```
 
 `src/analysis.py` es el unico modulo que limpia y transforma los datos. `src/app.py` carga exclusivamente los archivos materializados en `data/processed`; no realiza limpieza ni mantiene una fuente de verdad temporal en memoria.
@@ -135,13 +134,14 @@ La app incluye filtros por periodo, categoria y bodega, y cuatro modulos:
 
 El informe [Informe_Hallazgos_TechLogistics.tex](informe/Informe_Hallazgos_TechLogistics.tex) responde los cinco puntos del reto con tablas, conclusiones y visualizaciones alineadas con el dashboard. El PDF compilado se encuentra en [informe/Informe_Hallazgos_TechLogistics.pdf](informe/Informe_Hallazgos_TechLogistics.pdf).
 
-Las cinco figuras se generan en `informe/tex_figures` y se insertan en el punto correspondiente del informe:
+Las seis imagenes utilizadas por el informe se exportan desde las visualizaciones del dashboard y se almacenan en `informe/tex_figures`:
 
 1. Margen negativo y fuga de capital.
 2. Crisis logistica y relacion entre entrega y NPS.
 3. Venta invisible e ingreso en riesgo.
 4. Stock alto y fidelidad negativa.
 5. Riesgo operativo por antiguedad de revision y tickets.
+6. Matriz de correlacion logistica y de satisfaccion.
 
 ## Estructura principal
 
@@ -151,7 +151,6 @@ Data_Science2/
 |   |-- analysis.py
 |   |-- app.py
 |   |-- transparency.py
-|   |-- generate_tex_figures.py
 |   `-- requirements.txt
 |-- data/
 |   |-- raw/

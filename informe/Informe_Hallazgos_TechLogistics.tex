@@ -56,20 +56,20 @@ USD -2.784.185,83. Entre sus SKU críticos están PROD-3284 (USD -20.780,68),
 PROD-1036 (USD -20.691,23), PROD-2288 (USD -20.055,82) y PROD-1560
 (USD -19.423,82).
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{tex_figures/01_margen_negativo.png}
+\caption{SKUs con mayor margen negativo.}
+\end{figure}
+
 \textbf{Conclusión gerencial:} no es una pérdida aceptable por volumen. El
 volumen es precisamente una señal de que el precio final, el costo unitario o
 el costo de envío están mal configurados. La prioridad es congelar promociones
 de estos SKU en Online y revisar precio mínimo, descuentos y costo logístico.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/01_margen_negativo.png}
-\caption{Punto 1: SKUs con mayor margen negativo.}
-\end{figure}
-
 \section{Crisis logística y cuellos de botella}
 La correlación global dentro de cada ciudad entre tiempo de entrega y NPS es
-débile: el valor absoluto máximo observado es aproximadamente 0,05 en
+débil: el valor absoluto máximo observado es aproximadamente 0,05 en
 Barranquilla. Por ello, el dataset no permite afirmar una relación lineal fuerte;
 sin embargo, sí permite localizar concentraciones de insatisfacción.
 
@@ -87,22 +87,28 @@ Medellín & 15,21 & 0,10 & 0,011 \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{tex_figures/06_matriz_correlacion.png}
+\caption{Matriz de correlación global.}
+\end{figure}
+
 Por bodega, NORTE presenta el peor NPS promedio (-2,73), seguido por
 ZONA\_FRANCA (-0,46). La combinación más crítica por NPS es Bogotá--
 ZONA\_FRANCA, con NPS -10,97 y 14,60 días de entrega promedio. Barranquilla--
 NORTE también es crítica: NPS -8,90, 15,14 días y 20,45\% de tickets.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{tex_figures/02_crisis_logistica.png}
+\caption{Zonas ciudad--bodega con menor NPS y mayor presión logística.}
+\end{figure}
 
 \textbf{Decisión:} NORTE requiere el cambio o auditoría inmediata del operador,
 con foco inicial en Barranquilla. Bogotá--ZONA\_FRANCA debe permanecer como
 segundo frente de intervención. La recomendación debe validarse con SLA,
 transportista y tamaño de muestra antes de terminar el contrato, porque la
 correlación simple por ciudad es débil.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{tex_figures/02_crisis_logistica.png}
-\caption{Punto 2: zonas ciudad--bodega con menor NPS y mayor presión logística.}
-\end{figure}
 
 \section{Análisis de la venta invisible}
 El left join identificó 1.728 transacciones cuyo SKU no aparece en el inventario
@@ -116,16 +122,16 @@ del ingreso total analizado. El ingreso se conserva para trazabilidad, pero el
 margen de estas ventas no debe interpretarse como confiable porque no existe un
 costo unitario oficial asociado.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{tex_figures/03_venta_invisible.png}
+\caption{Ingreso correspondiente a SKU sin catálogo oficial.}
+\end{figure}
+
 \textbf{Conclusión gerencial:} la venta invisible es un riesgo de control de
 inventario y de reconocimiento de rentabilidad, no una simple anomalía técnica.
 Debe cerrarse la brecha entre catálogo, ERP y canales de venta antes de escalar
 la operación.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.35\textwidth]{tex_figures/03_venta_invisible.png}
-\caption{Punto 3: ingreso correspondiente a SKU sin catálogo oficial.}
-\end{figure}
 
 \section{Diagnóstico de fidelidad}
 Sí existe una categoría con alta disponibilidad y sentimiento negativo:
@@ -136,7 +142,7 @@ principal es de calidad de catálogo.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{tex_figures/04_fidelidad.png}
-\caption{Punto 4: stock promedio frente a NPS por categoría.}
+\caption{Stock alto frente a NPS negativo.}
 \end{figure}
 
 \begin{table}[h]
@@ -191,7 +197,7 @@ especialmente en las rutas críticas identificadas.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{tex_figures/05_riesgo_operativo.png}
-\caption{Punto 5: antigüedad de revisión frente a tickets por bodega.}
+\caption{Antigüedad de revisión frente a tickets por bodega.}
 \end{figure}
 
 \section*{Plan de acción priorizado}
