@@ -147,11 +147,12 @@ Las cinco figuras se generan en `informe/tex_figures` y se insertan en el punto 
 
 ```text
 Data_Science2/
-|-- analysis.py
-|-- app.py
-|-- transparency.py
-|-- generate_tex_figures.py
-|-- requirements.txt
+|-- src/
+|   |-- analysis.py
+|   |-- app.py
+|   |-- transparency.py
+|   |-- generate_tex_figures.py
+|   `-- requirements.txt
 |-- data/
 |   |-- raw/
 |   `-- processed/
@@ -159,6 +160,7 @@ Data_Science2/
 |   |-- Informe_Hallazgos_TechLogistics.tex
 |   |-- Informe_Hallazgos_TechLogistics.pdf
 |   `-- tex_figures/
+|-- .gitignore
 `-- README.md
 ```
 
