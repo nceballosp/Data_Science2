@@ -4,3 +4,4 @@ streamlit
 plotly
 matplotlib
 groq
+seaborn
