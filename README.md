@@ -2,9 +2,9 @@
 
 Solucion del taller de EDA, transformacion y visualizacion para TechLogistics. El proyecto integra tres fuentes con problemas de calidad: inventario, transacciones logisticas y feedback de clientes. El resultado es un pipeline reproducible, una fuente de verdad procesada, un dashboard interactivo en Streamlit y un informe ejecutivo en LaTeX.
 
-**Curso:** Fundamentos en Ciencia de Datos — Maestría en Ciencia de Datos y Analítica, EAFIT 
-**Fecha límite de entrega:** sábado 01 de agosto de 2026
-**Fecha de entrega real:** [26/07/2026]
+**Curso:** Fundamentos en Ciencia de Datos — Maestría en Ciencia de Datos y Analítica, EAFIT  
+**Fecha límite de entrega:** sábado 01 de agosto de 2026  
+**Fecha de entrega real:** [26/07/2026]  
 
 **Integrantes del equipo:**
 
