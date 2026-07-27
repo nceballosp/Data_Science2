@@ -4,7 +4,7 @@ Solucion del taller de EDA, transformacion y visualizacion para TechLogistics. E
 
 **Curso:** Fundamentos en Ciencia de Datos — Maestría en Ciencia de Datos y Analítica, EAFIT  
 **Fecha límite de entrega:** sábado 01 de agosto de 2026  
-**Fecha de entrega real:** [26/07/2026]  
+**Fecha de entrega real:** [27/07/2026]  
 
 **Integrantes del equipo:**
 
