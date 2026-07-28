@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from analysis import executive_metrics, load_processed, summarize_for_ai
-from transparency import build_transparency
+from transparency import build_cleaning_decisions, build_transparency
 
 
 st.set_page_config(page_title="TechLogistics DSS", page_icon="📊", layout="wide")
@@ -75,6 +75,27 @@ with tab_transparency:
                            title="Health Score antes y después"), use_container_width=True)
     st.plotly_chart(px.bar(transparency, x="Dataset", y=["Nulos raw (%)", "Nulos clean (%)"], barmode="group",
                            title="Nulidad antes y después"), use_container_width=True)
+
+    st.subheader("Decisión ética de limpieza")
+    st.markdown(
+        "**Criterio:** se eliminaron solo registros que no representan hechos válidos "
+        "(duplicados, cantidades no positivas o fechas futuras). Los faltantes se imputaron "
+        "cuando era posible conservar el registro sin inventar una observación."
+    )
+    decisions = build_cleaning_decisions()
+    st.dataframe(decisions, use_container_width=True, hide_index=True)
+    decision_chart = decisions.groupby("Decision", as_index=False)["Registros"].sum()
+    st.plotly_chart(
+        px.bar(decision_chart, x="Decision", y="Registros", color="Decision",
+               title="Registros eliminados, marcados e imputados"),
+        use_container_width=True,
+    )
+    st.info(
+        "No se aplicó moda a variables numéricas: la mediana es más robusta ante asimetría. "
+        "Para Estado_Envio se usa 'Desconocido' para no convertir la categoría más frecuente "
+        "en un dato inventado. Los costos atípicos de inventario se marcan en el archivo "
+        "de excluidos para preservar la señal de riesgo."
+    )
 
 with tab_ops:
     st.subheader("Rentabilidad, demanda y crisis logística")

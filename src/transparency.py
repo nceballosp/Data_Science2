@@ -42,3 +42,38 @@ def build_transparency() -> pd.DataFrame:
             "Health clean (%)": _health(clean.isna().mean().mean() * 100, clean_duplicates, len(clean)),
         })
     return pd.DataFrame(rows)
+
+
+def build_cleaning_decisions() -> pd.DataFrame:
+    """Explica decisiones de limpieza usando evidencia de los datos raw."""
+    inv = pd.read_csv(RAW / "inventario_central_v2.csv")
+    tx = pd.read_csv(RAW / "transacciones_logistica_v2.csv")
+    fb = pd.read_csv(RAW / "feedback_clientes_v2.csv")
+
+    def numeric_reason(series: pd.Series) -> str:
+        values = pd.to_numeric(series, errors="coerce").dropna()
+        skew = values.skew()
+        distribution = "asimetrica" if abs(skew) >= 0.5 else "aproximadamente simetrica"
+        return (f"La mediana es adecuada: distribucion {distribution} (sesgo {skew:.2f}) "
+                "y es menos sensible a valores extremos que la media.")
+
+    inv_cost = pd.to_numeric(inv["Costo_Unitario_USD"], errors="coerce")
+    q1, q3 = inv_cost.quantile([0.25, 0.75])
+    iqr = q3 - q1
+    cost_flags = ((inv_cost < q1 - 1.5 * iqr) | (inv_cost > q3 + 1.5 * iqr) | (inv_cost <= 0)).sum()
+    tx_qty = pd.to_numeric(tx["Cantidad_Vendida"], errors="coerce")
+    tx_dates = pd.to_datetime(tx["Fecha_Venta"], dayfirst=True, errors="coerce")
+    future = (tx_dates > pd.Timestamp.now().normalize()).sum()
+    invalid_qty = (tx_qty <= 0).sum()
+    fb_dups = fb.duplicated(subset=["Feedback_ID"], keep="first").sum()
+
+    return pd.DataFrame([
+        {"Dataset / campo": "Inventario / costo unitario", "Decision": "Marcar como excluidos", "Registros": int(cost_flags), "Metodo": "IQR y costo <= 0", "Justificacion": "Son valores imposibles o atipicos; imputarlos ocultaria una alerta de calidad."},
+        {"Dataset / campo": "Transacciones / cantidad y fecha", "Decision": "Eliminar", "Registros": int(invalid_qty + future), "Metodo": "Reglas de validez", "Justificacion": "Cantidad no positiva o venta futura no representa una transaccion real y distorsiona ingresos y margen."},
+        {"Dataset / campo": "Feedback / Feedback_ID repetido", "Decision": "Eliminar duplicados", "Registros": int(fb_dups), "Metodo": "Conservar primera ocurrencia", "Justificacion": "Evita ponderar varias veces la misma respuesta y sesgar NPS, ratings y tickets."},
+        {"Dataset / campo": "Inventario / stock y lead time", "Decision": "Imputar faltantes", "Registros": int(inv["Stock_Actual"].isna().sum() + inv["Lead_Time_Dias"].isna().sum()), "Metodo": "Mediana", "Justificacion": numeric_reason(inv["Stock_Actual"])},
+        {"Dataset / campo": "Inventario / costo unitario", "Decision": "Imputar faltantes", "Registros": int(inv_cost.isna().sum()), "Metodo": "Mediana", "Justificacion": numeric_reason(inv_cost)},
+        {"Dataset / campo": "Transacciones / costo de envio", "Decision": "Imputar faltantes", "Registros": int(tx["Costo_Envio"].isna().sum()), "Metodo": "Mediana", "Justificacion": numeric_reason(tx["Costo_Envio"])},
+        {"Dataset / campo": "Feedback / ratings y edad", "Decision": "Imputar faltantes o fuera de rango", "Registros": int(fb["Rating_Producto"].isna().sum() + fb["Edad_Cliente"].isna().sum()), "Metodo": "Mediana", "Justificacion": "Es robusta ante asimetria y outliers; evita fabricar valores extremos con el promedio."},
+        {"Dataset / campo": "Transacciones / estado de envio", "Decision": "Imputar faltantes", "Registros": int(tx["Estado_Envio"].isna().sum()), "Metodo": "Categoria Desconocido", "Justificacion": "No se usa moda: asignar el estado mas frecuente inventaria un estado operativo."},
+    ])
